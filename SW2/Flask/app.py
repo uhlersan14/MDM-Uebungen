@@ -1,35 +1,19 @@
-from flask import Flask, request
-
+from flask import Flask, request, jsonify
+import os
 
 app = Flask(__name__)
 
-@app.route("/")
-def hello_world():
-    return "<p>Hello2, World!</p>"
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
 
-if __name__ == "__main__":
-    app.run(debug=True)
+@app.route('/reverse', methods=['POST'])
+def reverse_text():
+    data = request.get_json()
+    text = data.get('text', '')
+    reversed_text = text[::-1]
+    return jsonify({'reversed': reversed_text})
 
-@app.route('/user/<username>')
-def show_user_profile(username):
-    return f'User {username}'
-
-@app.route('/post/<int:post_id>')
-def show_post(post_id):
-    return f'Post {post_id}'
-
-@app.route('/path/<path:subpath>')
-def show_subpath(subpath):
-    return f'Subpath {subpath}'
-
-@app.route("/test", methods=["GET"])
-def test():
-    # Hole den 'text'-Parameter aus der URL
-    text = request.args.get("text")
-
-    # Überprüfe, ob der 'text'-Parameter leer ist
-    if text == "" or text is None:
-        return "Please use the 'text' parameter in the GET URL"
-    
-    # Gib den 'text'-Parameter zurück
-    return text
+if __name__ == '__main__':
+    port = int(os.environ.get('PORT', 5000))  # Für Azure Deployment wichtig
+    app.run(host='0.0.0.0', port=port)
